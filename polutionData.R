@@ -27,27 +27,29 @@ complete <- function(directory, id = 1:332, removeNA = TRUE) {
     }
 }
 
-corr <- function(directory, threshold = 0, id = 1:332,  removeNA = TRUE) {
+corr <- function(directory, threshold = 0, id = 1:332) {
     
+    corrVector = numeric()
     for(idNumber in id) {
         append <- "" 
         if(idNumber < 10) append <- "00" 
         else if(idNumber >= 10 && idNumber < 100) append <- "0"
-        meanD <- read.csv(paste(".\\", directory,"\\", append, idNumber, ".csv", sep=""))[, 2:3]
-        ##meanD <- meanD[!is.na(meanD)]
+        meanD <- read.csv(paste(".\\", directory,"\\", append, idNumber, ".csv", sep=""))[ ,2:3]
+        sulfates <- numeric()
+        nitrates <- numeric()
         for(rowN in 1: nrow(meanD)) {
-            if(is.na(meanD[rowN, "sulfate"]) | is.na(meanD[rowN, "nitrate"])) {
-                meanD <- meanD[-c(rowN)] 
+
+            if(!is.na(meanD[rowN, "sulfate"]) && !is.na(meanD[rowN, "nitrate"])) {
+                sulfates <- append(sulfates, meanD[rowN, "sulfate"])
+                nitrates <- append(nitrates, meanD[rowN, "nitrate"])
             }
         }
-        ##meanD <- meanD[meanD$sulfate > threshold && meanD$nitrate > threshold]
-        print(meanD)
-        for(rowN in 1: nrow(meanD)) {
-            if(meanD[rowN, "sulfate"] <  threshold || meanD[rowN, "nitrate"] < threshold) {
-                meanD <- meanD[-c(rowN)] 
-            }
-        }       
-        print(meanD)
+        
+        lengthR <- length(sulfates)
+        if(lengthR >= threshold) {
+            corrVector <- append(corrVector, cor(sulfates, nitrates))
+        }
     }
+    corrVector
 }
 
